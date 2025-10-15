@@ -1,0 +1,16 @@
+# docker-compose.yml
+version: '3.8'
+services:
+  db:
+    image: postgres:14.5 # Or your preferred PostgreSQL version
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "15432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: taller_challenge_development # Customize your database name
+
+volumes:
+  postgres_data:
