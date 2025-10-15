@@ -47,3 +47,7 @@ group :development, :test do
   gem 'rspec-rails', '~> 6.1'
   gem 'factory_bot_rails'
 end
+
+group :test do
+  gem 'shoulda-matchers', '~> 5.0' # Or the latest stable version
+end
