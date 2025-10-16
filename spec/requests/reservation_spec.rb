@@ -4,14 +4,22 @@ RSpec.describe "Reservations", type: :request do
   describe "GET /book/reservations" do
     context "when is successful" do
       let(:book)  { create(:book) }
-      let!(:reservations) { create_list(:reservation, reservations_count, book: book) }
-
-      before do
-        get book_reservations_path(book)
-      end
 
       context "when there are reservations" do
         let(:reservations_count) { 2 }
+        let!(:reservations) do
+          first_reservation = create(:reservation, book: book)
+
+          book.available! #simulates a returned book
+
+          second_reservation = create(:reservation, book: book)
+
+          [first_reservation, second_reservation]
+        end
+
+        before do
+          get book_reservations_path(book)
+        end
 
         it "returns http success" do
           expect(response).to have_http_status(:success)
@@ -31,7 +39,9 @@ RSpec.describe "Reservations", type: :request do
       end
 
       context "when there are no reservations" do
-        let(:reservations_count) { 0 }
+        before do
+          get book_reservations_path(book)
+        end
 
         it "returns http success" do
           expect(response).to have_http_status(:success)
@@ -158,7 +168,7 @@ RSpec.describe "Reservations", type: :request do
         end
 
         it "returns error message" do
-          expect(response.parsed_body).to eq({ "error" => "Book is already reserved" })
+          expect(response.parsed_body).to eq({ "errors" => ["Book is already reserved"] })
         end
       end
 

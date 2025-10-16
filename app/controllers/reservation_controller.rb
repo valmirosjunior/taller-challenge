@@ -14,14 +14,7 @@ class ReservationController < ApplicationController
   end
 
   def create
-    if @book.status == "reserved"
-      render json: { error: "Book is already reserved" }, status: :unprocessable_entity
-      return
-    end
-
-    @book.status = "reserved"
-    @book.save!
-    reservation = Reservation.new(book: @book, user: @user)
+    reservation = @book.reservations.build(user: @user)
 
     if reservation.save
       render json: reservation, status: :ok
