@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :users, only: [:index, :show, :create]
+  
   resources :books, only: [:index, :show, :create] do
     resources :reservations, controller: "reservation", only: [:index, :show]
     resource :reserve, controller: "reservation", only: [:create]
