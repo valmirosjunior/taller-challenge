@@ -22,7 +22,7 @@ end
 
 shared_examples "returns unprocessable entity response" do
   it "returns unprocessable entity status" do
-    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response).to have_http_status(:unprocessable_content)
   end
 
   it "returns error message" do

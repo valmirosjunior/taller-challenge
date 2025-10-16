@@ -1,5 +1,4 @@
 # docker-compose.yml
-version: '3.8'
 services:
   db:
     image: postgres:14.5 # Or your preferred PostgreSQL version
@@ -10,7 +9,43 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: taller_challenge_development # Customize your database name
+      POSTGRES_DB: taller_challenge_development
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 1s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: password
+    volumes:
+      - .:/app
+      - gem_cache:/usr/local/bundle
+    stdin_open: true
+    tty: true
+    networks:
+      - app-network
+    command: bash -c "rm -f tmp/pids/server.pid && rails db:prepare && rails server -b 0.0.0.0"
 
 volumes:
   postgres_data:
+  gem_cache:
+
+networks:
+  app-network:
+    driver: bridge
+
