@@ -6,6 +6,9 @@ RSpec.describe UserSerializer, type: :serializer do
   it 'serializes user correctly' do
     serialized = JSON.parse(UserSerializer.new(user).to_json)
 
-    expect(serialized).to eq({ 'email' => user.email })
+    expect(serialized).to eq({
+      'id' => user.id,
+      'email' => user.email
+    })
   end
 end

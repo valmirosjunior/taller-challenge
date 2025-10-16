@@ -7,6 +7,7 @@ RSpec.describe BookSerializer, type: :serializer do
     serialized = JSON.parse(BookSerializer.new(book).to_json)
 
     expect(serialized).to eq({
+      'id' => book.id,
       'title' => book.title,
       'status' => book.status
     })
