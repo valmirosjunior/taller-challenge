@@ -53,5 +53,5 @@ group :development, :test do
 end
 
 group :test do
-  gem "shoulda-matchers", "~> 5.0" # Or the latest stable version
+  gem "shoulda-matchers", "~> 6.5" # Or the latest stable version
 end
