@@ -20,7 +20,7 @@ RSpec.describe "Reservations", type: :request do
           first_reservation = create(:reservation, book: book)
           book.available! # simulates a returned book
           second_reservation = create(:reservation, book: book)
-          [first_reservation, second_reservation]
+          [ first_reservation, second_reservation ]
         end
 
         let(:expected_response) do
@@ -45,9 +45,9 @@ RSpec.describe "Reservations", type: :request do
 
     context "when is not successful" do
       include_context "with non-existent book"
-      
+
       before { get book_reservations_path(book) }
-      
+
       include_examples "returns not found response"
       include_examples "does not create record", Reservation
     end
@@ -93,13 +93,13 @@ RSpec.describe "Reservations", type: :request do
       let(:expected_response) { JSON.parse(ReservationSerializer.new(Reservation.last).to_json) }
 
       include_examples "returns success response"
-      
+
       it "creates a reservation" do
         expect(Reservation.count).to eq(1)
         expect(Reservation.last.book).to eq(book)
         expect(Reservation.last.user).to eq(user)
       end
-      
+
       it "updates book status to reserved" do
         expect(book.reload.status).to eq("reserved")
       end

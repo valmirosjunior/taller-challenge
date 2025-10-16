@@ -5,10 +5,10 @@ RSpec.describe BookSerializer, type: :serializer do
 
   it 'serializes book correctly' do
     serialized = JSON.parse(BookSerializer.new(book).to_json)
-    
+
     expect(serialized).to eq({
       'title' => book.title,
-      'status' => book.status,
+      'status' => book.status
     })
   end
 end

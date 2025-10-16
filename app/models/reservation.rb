@@ -9,7 +9,7 @@ class Reservation < ApplicationRecord
 
   def book_must_be_available
     return unless book&.reserved?
-    
+
     errors.add(:book, "is already reserved")
   end
 

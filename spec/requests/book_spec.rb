@@ -5,7 +5,7 @@ RSpec.describe "Books", type: :request do
     context "when is successful" do
       context "when there are books" do
         let!(:books) { create_list(:book, 3) }
-        
+
         let(:expected_response) do
           books.map do |book|
             JSON.parse(BookSerializer.new(book).to_json)
@@ -13,7 +13,7 @@ RSpec.describe "Books", type: :request do
         end
 
         before { get books_path }
-        
+
         include_examples "returns success response"
       end
 
@@ -21,7 +21,7 @@ RSpec.describe "Books", type: :request do
         let(:expected_response) { [] }
 
         before { get books_path }
-        
+
         include_examples "returns success response"
       end
     end
@@ -39,9 +39,9 @@ RSpec.describe "Books", type: :request do
 
     context "when is not successful" do
       let(:book_id) { -1 }
-      
+
       before { get book_path(book_id) }
-      
+
       include_examples "returns not found response"
     end
   end
@@ -54,12 +54,12 @@ RSpec.describe "Books", type: :request do
       let(:expected_response) { JSON.parse(BookSerializer.new(Book.last).to_json) }
 
       include_examples "returns success response"
-      
+
       it "creates a book" do
         expect(Book.count).to eq(1)
         expect(Book.last.title).to eq(params[:title])
       end
-      
+
       it "sets book status as available by default" do
         expect(Book.last.status).to eq("available")
       end

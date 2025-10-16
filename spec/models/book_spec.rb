@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe Book, type: :model do
   it { should have_many(:reservations) }
   it { should have_many(:users).through(:reservations) }
-  
+
   it { should validate_presence_of(:title) }
 
   describe 'status enum' do
@@ -19,11 +19,11 @@ RSpec.describe Book, type: :model do
     it 'allows changing status' do
       book = Book.create!(title: 'Test Book')
       expect(book.available?).to be true
-      
+
       book.reserved!
       expect(book.reserved?).to be true
       expect(book.available?).to be false
-      
+
       book.available!
       expect(book.available?).to be true
       expect(book.reserved?).to be false

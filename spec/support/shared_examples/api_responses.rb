@@ -3,7 +3,7 @@ shared_examples "returns success response" do
   it "returns http success" do
     expect(response).to have_http_status(:success)
   end
-  
+
   it "returns valid JSON response with serialized data" do
     expect(response.parsed_body).to eq(expected_response)
   end
@@ -14,7 +14,7 @@ shared_examples "returns not found response" do
   it "returns not found status" do
     expect(response).to have_http_status(:not_found)
   end
-  
+
   it "returns record not found error message" do
     expect(response.parsed_body).to eq({ "error" => "Record not found" })
   end

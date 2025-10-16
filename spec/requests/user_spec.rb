@@ -2,12 +2,12 @@ require 'rails_helper'
 
 RSpec.describe "Users", type: :request do
   before { User.delete_all }
-  
+
   describe "GET /users" do
     context "when is successful" do
       context "when there are users" do
         let!(:users) { create_list(:user, 3) }
-        
+
         let(:expected_response) do
           users.map do |user|
             JSON.parse(UserSerializer.new(user).to_json)
@@ -15,7 +15,7 @@ RSpec.describe "Users", type: :request do
         end
 
         before { get users_path }
-        
+
         include_examples "returns success response"
       end
 
@@ -23,7 +23,7 @@ RSpec.describe "Users", type: :request do
         let(:expected_response) { [] }
 
         before { get users_path }
-        
+
         include_examples "returns success response"
       end
     end
@@ -41,9 +41,9 @@ RSpec.describe "Users", type: :request do
 
     context "when is not successful" do
       let(:user_id) { -1 }
-      
+
       before { get user_path(user_id) }
-      
+
       include_examples "returns not found response"
     end
   end
@@ -57,7 +57,7 @@ RSpec.describe "Users", type: :request do
       before { post users_path, params: params }
 
       include_examples "returns success response"
-      
+
       it "creates a user" do
         expect(User.count).to eq(1)
         expect(User.last.email).to eq(params[:email])
@@ -72,7 +72,7 @@ RSpec.describe "Users", type: :request do
         before { post users_path, params: params }
 
         include_examples "returns unprocessable entity response"
-        
+
         it "does not create a user" do
           expect(User.count).to eq(0)
         end
@@ -82,13 +82,13 @@ RSpec.describe "Users", type: :request do
         let(:existing_email) { user.email }
         let(:user) { create(:user) }
         let(:expected_errors) { [ "Email has already been taken" ] }
-        
-        before do          
+
+        before do
           post users_path, params: { email: existing_email }
         end
 
         include_examples "returns unprocessable entity response"
-        
+
         it "does not create a new user" do
           expect(User.where(email: existing_email).count).to eq(1)
         end

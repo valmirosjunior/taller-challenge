@@ -1,7 +1,7 @@
 class ReservationController < ApplicationController
-  before_action :set_book, only: [:index, :show, :create]
-  before_action :set_user, only: [:create]
-  before_action :set_reservation, only: [:show]
+  before_action :set_book, only: [ :index, :show, :create ]
+  before_action :set_user, only: [ :create ]
+  before_action :set_reservation, only: [ :show ]
 
   def index
     reservations = @book.reservations.includes(:user)
@@ -33,12 +33,12 @@ class ReservationController < ApplicationController
   def set_book
     @book = Book.find(params[:book_id])
   end
-  
+
   def set_user
     @user = User.find_by!(email: reservation_params[:user_email])
   end
 
   def reservation_params
     params.permit(:user_email)
-  end  
+  end
 end
