@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   resources :books, only: [] do
-    post "reserve", to: "reservation#create"
+    resources :reservations, controller: "reservation", only: [:index, :show]
+    resource :reserve, controller: "reservation", only: [:create]
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

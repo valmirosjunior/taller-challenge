@@ -1,5 +1,17 @@
 class ReservationController < ApplicationController
-  before_action :set_book, :set_user, only: [:create]
+  before_action :set_book, only: [:index, :show, :create]
+  before_action :set_user, only: [:create]
+  before_action :set_reservation, only: [:show]
+
+  def index
+    reservations = @book.reservations.includes(:user)
+
+    render json: reservations, status: :ok
+  end
+
+  def show
+    render json: @reservation, status: :ok
+  end
 
   def create
     if @book.status == "reserved"
@@ -20,6 +32,10 @@ class ReservationController < ApplicationController
 
 
   private
+
+  def set_reservation
+    @reservation = @book.reservations.find(params[:id])
+  end
 
   def set_book
     @book = Book.find(params[:book_id])
