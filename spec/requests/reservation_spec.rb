@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe "Reservations", type: :request do
-  # Shared contexts específicos de reservations
+  # Shared contexts specific to reservations
   shared_context "with non-existent book" do
     let(:book) { build(:book, id: -1) }
     let(:params) { {} }

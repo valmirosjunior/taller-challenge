@@ -34,7 +34,7 @@ RSpec.describe Reservation, type: :model do
 
     context 'when reservation fails to save for other reasons' do
       it 'rolls back book status' do
-        # Simular falha na validação do user
+        # Simulate user validation failure
         allow_any_instance_of(User).to receive(:valid?).and_return(false)
 
         expect(book.available?).to be true

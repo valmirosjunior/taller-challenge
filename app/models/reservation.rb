@@ -15,11 +15,11 @@ class Reservation < ApplicationRecord
 
   def create_with_book_reservation
     ApplicationRecord.transaction do
-      yield # Executa o salvamento da reserva
-      book.reserved! # Marca o livro como reservado
+      yield # Execute reservation save
+      book.reserved! # Mark book as reserved
     end
   rescue ActiveRecord::RecordInvalid => e
-    # Se algo der errado na transação, ela será revertida automaticamente
+    # If something goes wrong in the transaction, it will be automatically rolled back
     errors.add(:base, "Failed to create reservation: #{e.message}")
     throw :abort
   end
