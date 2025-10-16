@@ -1,5 +1,9 @@
 require 'rails_helper'
 
 RSpec.describe Book, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+  it { should have_many(:reservations) }
+  it { should have_many(:users).through(:reservations) }
+  
+  it { should validate_presence_of(:title) }
+  it { should validate_inclusion_of(:status).in_array(%w[available reserved]) }  
 end
