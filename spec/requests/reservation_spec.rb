@@ -1,205 +1,134 @@
 require 'rails_helper'
 
 RSpec.describe "Reservations", type: :request do
+  # Shared contexts específicos de reservations
+  shared_context "with non-existent book" do
+    let(:book) { build(:book, id: -1) }
+    let(:params) { {} }
+  end
+
+  shared_context "with non-existent reservation" do
+    let(:reservation) { build(:reservation, id: -1) }
+  end
+
   describe "GET /book/reservations" do
     context "when is successful" do
-      let(:book)  { create(:book) }
+      let(:book) { create(:book) }
 
       context "when there are reservations" do
-        let(:reservations_count) { 2 }
         let!(:reservations) do
           first_reservation = create(:reservation, book: book)
-
-          book.available! #simulates a returned book
-
+          book.available! # simulates a returned book
           second_reservation = create(:reservation, book: book)
-
           [first_reservation, second_reservation]
         end
 
-        before do
-          get book_reservations_path(book)
-        end
-
-        it "returns http success" do
-          expect(response).to have_http_status(:success)
-        end
-
-        it "returns an array of reservations" do
-          expect(response.parsed_body.size).to eq(reservations_count)
-        end
-
-        it "returns valid JSON response with serialized data" do
-          expected_response = reservations.map do |reservation|
+        let(:expected_response) do
+          reservations.map do |reservation|
             JSON.parse(ReservationSerializer.new(reservation).to_json)
           end
-
-          expect(response.parsed_body).to eq(expected_response)
         end
+
+        before { get book_reservations_path(book) }
+
+        include_examples "returns success response"
       end
 
       context "when there are no reservations" do
-        before do
-          get book_reservations_path(book)
-        end
+        let(:expected_response) { [] }
 
-        it "returns http success" do
-          expect(response).to have_http_status(:success)
-        end
+        before { get book_reservations_path(book) }
 
-        it "returns empty array" do
-          expect(response.parsed_body).to eq([])
-        end
+        include_examples "returns success response"
       end
     end
 
     context "when is not successful" do
-      before do
-        get book_reservations_path(book)
-      end
-
-      context "when book does not exist" do
-        let(:book)  { build(:book, id: -1) }      
-        let(:params) { {} }
-
-        it "returns not found status" do
-          expect(response).to have_http_status(:not_found)
-        end
-
-        it "does not create a reservation" do
-          expect(Reservation.count).to eq(0)
-        end
-      end
+      include_context "with non-existent book"
+      
+      before { get book_reservations_path(book) }
+      
+      include_examples "returns not found response"
+      include_examples "does not create record", Reservation
     end
   end
 
   describe "GET /book/reserve/:id" do
-    before do
-      get book_reservation_path(book, reservation)
-    end
-
     context "when is successful" do
-      let!(:reservation) { create(:reservation, book: book) }
       let(:book) { create(:book) }
+      let!(:reservation) { create(:reservation, book: book) }
+      let(:expected_response) { JSON.parse(ReservationSerializer.new(reservation).to_json) }
 
-      it "returns http success" do
-        expect(response).to have_http_status(:success)
-      end
+      before { get book_reservation_path(book, reservation) }
 
-      it "returns valid JSON response with serialized data" do
-        expected_response = JSON.parse(ReservationSerializer.new(reservation).to_json)
-        expect(response.parsed_body).to eq(expected_response)
-      end
+      include_examples "returns success response"
     end
 
     context "when is not successful" do
-      let(:reservation) { build(:reservation, id: -1) }
+      before { get book_reservation_path(book, reservation) }
 
       context "when reservation does not exist" do
+        include_context "with non-existent reservation"
         let(:book) { create(:book) }
 
-        it "returns not found status" do
-          expect(response).to have_http_status(:not_found)
-        end
+        include_examples "returns not found response"
       end
 
       context "when book does not exist" do
-        let(:book) { build(:book, id: -1) }
+        include_context "with non-existent book"
+        include_context "with non-existent reservation"
 
-        it "returns not found status" do
-          expect(response).to have_http_status(:not_found)
-        end
+        include_examples "returns not found response"
       end
     end
   end
 
   describe "POST /book/reserve" do
-    before do
-      post book_reserve_path(book), params: params
-    end
+    before { post book_reserve_path(book), params: params }
 
     context "when is successful" do
-      let(:book)  { create(:book) }      
-      let(:user)  { create(:user) }
-      let(:params) do
-        {
-          user_email: user.email
-        }
-      end
-      let(:last_reservation) { Reservation.last }
-      let(:expected_response) { JSON.parse(ReservationSerializer.new(last_reservation).to_json) }
+      let(:book) { create(:book) }
+      let(:user) { create(:user) }
+      let(:params) { { user_email: user.email } }
+      let(:expected_response) { JSON.parse(ReservationSerializer.new(Reservation.last).to_json) }
 
-      it "returns http success" do
-        expect(response).to have_http_status(:success)
-      end
-
+      include_examples "returns success response"
+      
       it "creates a reservation" do
         expect(Reservation.count).to eq(1)
-        
-        expect(last_reservation.book).to eq(book)
-        expect(last_reservation.user).to eq(user)
+        expect(Reservation.last.book).to eq(book)
+        expect(Reservation.last.user).to eq(user)
       end
-
-      it "updates the book status to reserved" do
+      
+      it "updates book status to reserved" do
         expect(book.reload.status).to eq("reserved")
-      end
-
-      it "returns valid JSON response" do
-        expect(response.parsed_body).to eq(expected_response)
       end
     end
 
     context "when is not successful" do
       context "when the book is already reserved" do
-        let(:book)  { create(:book, status: "reserved") }      
-        let(:user)  { create(:user) }
-        let(:params) do
-          {
-            user_email: user.email
-          }
-        end
+        let(:book) { create(:book, status: "reserved") }
+        let(:user) { create(:user) }
+        let(:params) { { user_email: user.email } }
+        let(:expected_errors) { [ "Book is already reserved" ] }
 
-        it "returns unprocessable entity status" do
-          expect(response).to have_http_status(:unprocessable_entity)
-        end
-
-        it "does not create a reservation" do
-          expect(Reservation.count).to eq(0)
-        end
-
-        it "returns error message" do
-          expect(response.parsed_body).to eq({ "errors" => ["Book is already reserved"] })
-        end
+        include_examples "returns unprocessable entity response"
+        include_examples "does not create record", Reservation
       end
 
       context "when the user does not exist" do
-        let(:book)  { create(:book) }      
-        let(:params) do
-          {
-            user_email: "non_existent_user@example.com"
-          }
-        end
+        let(:book) { create(:book) }
+        let(:params) { { user_email: "non_existent_user@example.com" } }
 
-        it "returns not found status" do
-          expect(response).to have_http_status(:not_found)
-        end
-
-        it "does not create a reservation" do
-          expect(Reservation.count).to eq(0)
-        end
+        include_examples "returns not found response"
+        include_examples "does not create record", Reservation
       end
 
       context "when book does not exist" do
-        let(:book)  { build(:book, id: -1) }      
-        let(:params) { {} }
+        include_context "with non-existent book"
 
-        it "returns not found status" do
-          expect(response).to have_http_status(:not_found)
-        end
-
-        it "does not create a reservation" do
-          expect(Reservation.count).to eq(0)
-        end
+        include_examples "returns not found response"
+        include_examples "does not create record", Reservation
       end
     end
   end
